@@ -379,6 +379,7 @@ def completion(
         try:
             if len(outputText) > 0:
                 model_response["choices"][0]["message"]["content"] = outputText
+                print("outputText: ", outputText)
         except:
             raise BedrockError(message=json.dumps(outputText), status_code=response.status_code)
 

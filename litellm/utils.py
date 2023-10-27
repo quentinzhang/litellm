@@ -1642,7 +1642,7 @@ def get_llm_provider(model: str, custom_llm_provider: Optional[str] = None, api_
             print()
             print("\033[1;31mProvider List: https://docs.litellm.ai/docs/providers\033[0m")
             print()
-            raise ValueError(f"LLM Provider NOT provided. Pass in the LLM provider you are trying to call. E.g. For 'Huggingface' inference endpoints pass in `completion(model='huggingface/{model}',..)` Learn more: https://docs.litellm.ai/docs/providers")
+            raise ValueError(f"!!!!!LLM Provider NOT provided. Pass in the LLM provider you are trying to call. E.g. For 'Huggingface' inference endpoints pass in `completion(model='huggingface/{model}',..)` Learn more: https://docs.litellm.ai/docs/providers")
         return model, custom_llm_provider, dynamic_api_key, api_base
     except Exception as e: 
         raise e
