@@ -14,20 +14,11 @@ A simple, fast, and lightweight **OpenAI-compatible server** to call 100+ LLM AP
 ## Usage 
 
 ```shell
-docker run -e PORT=8000 -p 8000:8000 ghcr.io/berriai/litellm:latest
+docker run -e PORT=8000 -e OPENAI_API_KEY=<your-openai-key> -p 8000:8000 ghcr.io/berriai/litellm:latest
 
 # UVICORN: OpenAI Proxy running on http://0.0.0.0:8000
 ```
 
-## Endpoints:
-- `/chat/completions` - chat completions endpoint to call 100+ LLMs
-- `/router/completions` - for multiple deployments of the same model (e.g. Azure OpenAI), uses the least used deployment. [Learn more](https://docs.litellm.ai/docs/routing)
-- `/models` - available models on server
-
-## Making Requests to Proxy
-### Curl
-
-**Call OpenAI**
 ```shell
 curl http://0.0.0.0:8000/v1/chat/completions \
   -H "Content-Type: application/json" \
@@ -37,18 +28,14 @@ curl http://0.0.0.0:8000/v1/chat/completions \
      "temperature": 0.7
    }'
 ```
-**Call Bedrock**
-```shell
-curl http://0.0.0.0:8000/v1/chat/completions \
-  -H "Content-Type: application/json" \
-  -d '{
-     "model": "bedrock/anthropic.claude-instant-v1",
-     "messages": [{"role": "user", "content": "Say this is a test!"}],
-     "temperature": 0.7
-   }'
-```
 
-### Running Locally
+[**See how to call Huggingface,Bedrock,TogetherAI,Anthropic, etc.**](https://docs.litellm.ai/docs/providers)
+## Endpoints:
+- `/chat/completions` - chat completions endpoint to call 100+ LLMs
+- `/router/completions` - for multiple deployments of the same model (e.g. Azure OpenAI), uses the least used deployment. [Learn more](https://docs.litellm.ai/docs/routing)
+- `/models` - available models on server
+
+## Running Locally
 ```shell 
 $ git clone https://github.com/BerriAI/litellm.git
 ```
@@ -60,4 +47,16 @@ $ cd ./litellm/litellm_server
 $ uvicorn main:app --host 0.0.0.0 --port 8000
 ```
 
-[**See how to call Huggingface,Bedrock,TogetherAI,Anthropic, etc.**](https://docs.litellm.ai/docs/simple_proxy)
+### Custom Config 
+1. Create + Modify [router_config.yaml](https://github.com/BerriAI/litellm/blob/main/router_config_template.yaml) (save your azure/openai/etc. deployment info)
+```shell
+cp ./router_config_template.yaml ./router_config.yaml
+```
+2. Build Docker Image
+```shell
+docker build -t litellm_server . --build-arg CONFIG_FILE=./router_config.yaml 
+```
+3. Run Docker Image
+```shell
+docker run --name litellm-proxy -e PORT=8000 -p 8000:8000 litellm_server
+```

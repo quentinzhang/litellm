@@ -1921,12 +1921,12 @@ def validate_environment(model: Optional[str]=None) -> dict:
     if model is None:
         return {"keys_in_environment": keys_in_environment, "missing_keys": missing_keys} 
     ## EXTRACT LLM PROVIDER - if model name provided
-    custom_llm_provider = None
-    # check if llm provider part of model name
-    if model.split("/",1)[0] in litellm.provider_list:
-        custom_llm_provider = model.split("/", 1)[0]
-        model = model.split("/", 1)[1]
-        custom_llm_provider_passed_in = True
+    custom_llm_provider = get_llm_provider(model=model)
+    # # check if llm provider part of model name
+    # if model.split("/",1)[0] in litellm.provider_list:
+    #     custom_llm_provider = model.split("/", 1)[0]
+    #     model = model.split("/", 1)[1]
+    #     custom_llm_provider_passed_in = True
     
     if custom_llm_provider:
         if custom_llm_provider == "openai":
@@ -1997,6 +1997,12 @@ def validate_environment(model: Optional[str]=None) -> dict:
                 keys_in_environment = True
             else:
                 missing_keys.append("NLP_CLOUD_API_KEY")
+        elif custom_llm_provider == "bedrock": 
+            if "AWS_ACCESS_KEY_ID" in os.environ and "AWS_SECRET_ACCESS_KEY" in os.environ: 
+                keys_in_environment = True
+            else:
+                missing_keys.append("AWS_ACCESS_KEY_ID")
+                missing_keys.append("AWS_SECRET_ACCESS_KEY")
     else:
         ## openai - chatcompletion + text completion
         if model in litellm.open_ai_chat_completion_models or litellm.open_ai_text_completion_models:
