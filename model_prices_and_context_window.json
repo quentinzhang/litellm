@@ -690,5 +690,12 @@
         "output_cost_per_token": 0.000001, 
         "litellm_provider": "anyscale", 
         "mode": "chat"
+      },
+      "chatglm_turbo": {
+        "max_tokens": 32768, 
+        "input_cost_per_token": 0.0000007, 
+        "output_cost_per_token": 0.0000007, 
+        "litellm_provider": "chatclm", 
+        "mode": "chat"
       }
 }

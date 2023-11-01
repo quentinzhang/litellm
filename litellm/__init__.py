@@ -100,6 +100,7 @@ aleph_alpha_models: List = []
 bedrock_models: List = []
 deepinfra_models: List = []
 perplexity_models: List = []
+chatclm_models: List = []
 for key, value in model_cost.items():
     if value.get('litellm_provider') == 'openai':
         open_ai_chat_completion_models.append(key)
@@ -132,6 +133,8 @@ for key, value in model_cost.items():
         deepinfra_models.append(key)
     elif value.get('litellm_provider') == 'perplexity':
         perplexity_models.append(key)
+    elif value.get('litellm_provider') == 'chatclm':
+        chatclm_models.append(key)
 
 # known openai compatible endpoints - we'll eventually move this list to the model_prices_and_context_window.json dictionary
 openai_compatible_endpoints: List = [
@@ -218,6 +221,10 @@ ollama_models = [
     "llama2"
 ]
 
+chatclm_models = [
+    "chatglm_turbo"
+]
+
 model_list = (
     open_ai_chat_completion_models
     + open_ai_text_completion_models
@@ -237,6 +244,7 @@ model_list = (
     + bedrock_models
     + deepinfra_models
     + perplexity_models
+    + chatclm_models
 )
 
 provider_list: List = [
@@ -263,6 +271,7 @@ provider_list: List = [
     "deepinfra",
     "perplexity",
     "anyscale",
+    "chatclm",
     "custom", # custom apis
 ]
 
@@ -282,6 +291,7 @@ models_by_provider: dict = {
     "ollama": ollama_models,
     "deepinfra": deepinfra_models,
     "perplexity": perplexity_models,
+    "chatclm": chatclm_models,
 }
 
 # mapping for those models which have larger equivalents 
@@ -350,6 +360,7 @@ from .llms.sagemaker import SagemakerConfig
 from .llms.ollama import OllamaConfig
 from .llms.bedrock import AmazonTitanConfig, AmazonAI21Config, AmazonAnthropicConfig, AmazonCohereConfig
 from .llms.openai import OpenAIConfig, OpenAITextCompletionConfig, AzureOpenAIConfig
+from .llms.chatclm import ChatClmConfig
 from .main import *  # type: ignore
 from .integrations import *
 from .exceptions import (

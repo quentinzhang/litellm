@@ -47,6 +47,7 @@ from .llms import (
     petals,
     oobabooga,
     palm,
+    chatclm,
     vertex_ai)
 from .llms.openai import OpenAIChatCompletion
 from .llms.prompt_templates.factory import prompt_factory, custom_prompt, function_call_prompt
@@ -221,6 +222,7 @@ def completion(
         - If 'mock_response' is provided, a mock completion response is returned for testing or debugging.
     """
     ######### unpacking kwargs #####################
+    print("inside completion")
     args = locals()
     return_async = kwargs.get('return_async', False)
     mock_response = kwargs.get('mock_response', None)
@@ -311,6 +313,7 @@ def completion(
             metadata=metadata
         )
         logging.update_environment_variables(model=model, user=user, optional_params=optional_params, litellm_params=litellm_params)
+        print("custom_llm_provider", custom_llm_provider)
         if custom_llm_provider == "azure":
             # azure configs
             api_type = get_secret("AZURE_API_TYPE") or "azure"
@@ -1194,6 +1197,30 @@ def completion(
                 )
                 return response
             response = model_response
+        elif (
+            custom_llm_provider == "chatclm"
+            ):
+            zhipu_api_key = (
+                api_key or os.environ.get("ZHIPU_API_KEY") or litellm.api_key
+            )
+
+            model_response = chatclm.completion(
+                model=model,
+                messages=messages,
+                model_response=model_response,
+                print_verbose=print_verbose,
+                optional_params=optional_params,
+                litellm_params=litellm_params,
+                logger_fn=logger_fn,
+                encoding=encoding, 
+                api_key=zhipu_api_key, 
+                logging_obj=logging
+            )
+            ## RESPONSE OBJECT
+            model_response["created"] = time.time()
+            model_response["model"] = model
+            response = model_response
+
         elif (
             custom_llm_provider == "custom"
             ):

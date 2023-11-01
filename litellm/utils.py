@@ -762,7 +762,6 @@ def client(original_function):
         try:
             logging_obj = function_setup(start_time, *args, **kwargs)
             kwargs["litellm_logging_obj"] = logging_obj
-
             # [OPTIONAL] CHECK BUDGET 
             if litellm.max_budget:
                 if litellm._current_cost > litellm.max_budget:
@@ -773,7 +772,6 @@ def client(original_function):
             print_verbose(f"litellm.caching: {litellm.caching}; litellm.caching_with_models: {litellm.caching_with_models}")
             if (litellm.caching or litellm.caching_with_models) and litellm.cache is None:
                 litellm.cache = Cache() 
-
             print_verbose(f"kwargs[caching]: {kwargs.get('caching', False)}; litellm.cache: {litellm.cache}")
             # if caching is false, don't run this 
             if (kwargs.get("caching", None) is None and litellm.cache is not None) or kwargs.get("caching", False) == True: # allow users to control returning cached responses from the completion function
@@ -1637,7 +1635,9 @@ def get_llm_provider(model: str, custom_llm_provider: Optional[str] = None, api_
         # cohere embeddings
         elif model in litellm.cohere_embedding_models:
             custom_llm_provider = "cohere"
-
+        # zhipu embeddings
+        elif model in litellm.chatclm_models:
+            custom_llm_provider = "chatclm"
         if custom_llm_provider is None or custom_llm_provider=="":
             print()
             print("\033[1;31mProvider List: https://docs.litellm.ai/docs/providers\033[0m")
@@ -3829,6 +3829,15 @@ class CustomStreamWrapper:
                     print(f"completion obj content: {completion_obj['content']}")
                     if response_obj["is_finished"]: 
                         model_response.choices[0].finish_reason = response_obj["finish_reason"]
+                elif self.custom_llm_provider == "chatclm":
+                    print("is chatclm")
+                    chunk = next(self.completion_stream)
+                    response_obj = self.handle_custom_openai_chat_completion_chunk(chunk)
+                    completion_obj["content"] = response_obj["text"]
+                    print(f"completion obj content: {completion_obj['content']}")
+                    if response_obj["is_finished"]: 
+                        model_response.choices[0].finish_reason = response_obj["finish_reason"]
+
                 else: # openai chat/azure models
                     chunk = next(self.completion_stream)
                     model_response = chunk
@@ -3853,6 +3862,7 @@ class CustomStreamWrapper:
         except StopIteration:
             raise StopIteration
         except Exception as e: 
+            print("error2")
             traceback_exception = traceback.print_exc()
             e.message = str(e)
              # LOG FAILURE - handle streaming failure logging in the _next_ object, remove `handle_failure` once it's deprecated

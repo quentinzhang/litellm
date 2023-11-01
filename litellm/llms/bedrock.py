@@ -382,17 +382,18 @@ def completion(
         except:
             raise BedrockError(message=json.dumps(outputText), status_code=response.status_code)
 
-    print("content:")
+    print("content_wrong:")
     print(model_response["choices"])
+
 
     ## CALCULATING USAGE - baseten charges on time, not tokens - have some mapping of cost here. 
     prompt_tokens = len(
         encoding.encode(prompt)
     )
 
-    response_content = model_response["choices"][0]["message"].get("content") or ""
+    #response_content = model_response["choices"][0]["message"].get("content") or ""
     completion_tokens = len(
-        encoding.encode(response_content)
+        encoding.encode(model_response["choices"][0]["message"].get("content",""))
     )
 
     model_response["created"] = time.time()
