@@ -98,7 +98,7 @@ def completion(
             additional_args={"complete_input_dict": data},
         )
     ## COMPLETION CALL
-	#zhipuai.api_key = api_ke
+	#zhipuai.api_key = api_key
     zhipuai.api_key = "38dc046c622b6ec1b9bfa0413e6ca2ee.2Yn3uFr8j74pMOvK"
     
     if stream:
