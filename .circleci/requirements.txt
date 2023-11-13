@@ -12,3 +12,4 @@ anthropic
 gptcache
 boto3
 appdirs
+zhipu
