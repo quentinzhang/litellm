@@ -17,7 +17,7 @@ from concurrent import futures
 from inspect import iscoroutinefunction
 from functools import wraps
 from threading import Thread
-from openai.error import Timeout
+from openai import Timeout
 
 
 def timeout(timeout_duration: float = 0.0, exception_to_raise=Timeout):
@@ -89,8 +89,15 @@ class _LoopWrapper(Thread):
         self.loop = asyncio.new_event_loop()
 
     def run(self) -> None:
-        self.loop.run_forever()
-        self.loop.call_soon_threadsafe(self.loop.close)
+        try:
+            self.loop.run_forever()
+            self.loop.call_soon_threadsafe(self.loop.close)
+        except Exception as e:
+            # Log exception here
+            pass
+        finally:
+            self.loop.close()
+            asyncio.set_event_loop(None)
 
     def stop_loop(self):
         for task in asyncio.all_tasks(self.loop):
