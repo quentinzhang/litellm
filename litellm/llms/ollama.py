@@ -3,12 +3,23 @@ import json
 import traceback
 from typing import Optional
 import litellm 
+import httpx
 
 try:
     from async_generator import async_generator, yield_  # optional dependency
     async_generator_imported = True
 except ImportError:
     async_generator_imported = False  # this should not throw an error, it will impact the 'import litellm' statement
+
+class OllamaError(Exception):
+    def __init__(self, status_code, message):
+        self.status_code = status_code
+        self.message = message
+        self.request = httpx.Request(method="POST", url="http://localhost:11434")
+        self.response = httpx.Response(status_code=status_code, request=self.request)
+        super().__init__(
+            self.message
+        )  # Call the base class constructor with the parameters it needs
 
 class OllamaConfig():
     """
@@ -123,6 +134,8 @@ def get_ollama_response_stream(
     session = requests.Session()
 
     with session.post(url, json=data, stream=True) as resp:
+        if resp.status_code != 200:
+            raise OllamaError(status_code=resp.status_code, message=resp.text)
         for line in resp.iter_lines():
             if line:
                 try:
@@ -147,7 +160,6 @@ def get_ollama_response_stream(
                                 yield completion_obj
                 except Exception as e:
                     traceback.print_exc()
-                    print(f"Error decoding JSON: {e}")
     session.close()
 
 if async_generator_imported:
@@ -175,6 +187,8 @@ if async_generator_imported:
         session = requests.Session()
 
         with session.post(url, json=data, stream=True) as resp:
+            if resp.status_code != 200:
+                raise OllamaError(status_code=resp.status_code, message=resp.text)
             for line in resp.iter_lines():
                 if line:
                     try:
@@ -198,5 +212,6 @@ if async_generator_imported:
                                     completion_obj["content"] = j["response"]
                                     await yield_({"choices": [{"delta": completion_obj}]})
                     except Exception as e:
-                        print(f"Error decoding JSON: {e}")
+                        import logging
+                        logging.debug(f"Error decoding JSON: {e}")
         session.close()

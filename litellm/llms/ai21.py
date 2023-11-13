@@ -2,7 +2,7 @@ import os, types, traceback
 import json
 from enum import Enum
 import requests
-import time
+import time, httpx
 from typing import Callable, Optional
 from litellm.utils import ModelResponse, Choices, Message
 import litellm
@@ -11,6 +11,8 @@ class AI21Error(Exception):
     def __init__(self, status_code, message):
         self.status_code = status_code
         self.message = message
+        self.request = httpx.Request(method="POST", url="https://api.ai21.com/studio/v1/")
+        self.response = httpx.Response(status_code=status_code, request=self.request)
         super().__init__(
             self.message
         )  # Call the base class constructor with the parameters it needs
@@ -150,7 +152,6 @@ def completion(
                 original_response=response.text,
                 additional_args={"complete_input_dict": data},
             )
-        print_verbose(f"raw model_response: {response.text}")
         ## RESPONSE OBJECT
         completion_response = response.json()
         if "error" in completion_response:
