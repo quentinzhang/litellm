@@ -17,7 +17,6 @@ click = "*"
 jinja2 = "^3.1.2"
 certifi = "^2023.7.22"
 appdirs = "^1.4.4"
-zhipuai
 aiohttp = "*"
 
 [tool.poetry.scripts]
